@@ -38,17 +38,13 @@ pub struct AccountsDb {
 
 impl VersionedAccount {
     pub fn get_account(&self, slots_to_include: &[Slot]) -> Option<&Account> {
-        for inflight_update in self.inflight_updates.iter().rev() {
-            if slots_to_include.contains(&inflight_update.0) {
-                return Some(&inflight_update.1);
+        for (slot, account) in self.inflight_updates.iter().rev() {
+            if slots_to_include.contains(&slot) {
+                return Some(&account);
             }
         }
 
-        if let Some(finalized_acc) = &self.finalized_acc {
-            Some(finalized_acc)
-        } else {
-            None
-        }
+        self.finalized_acc.as_ref()
     }
 
     pub fn load_account(&mut self, slots_to_include: &[Slot]) -> &mut Account {
